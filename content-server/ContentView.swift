@@ -200,6 +200,7 @@ struct ContentView: View {
   @State var error = ""
   // 启动信息
   @State var message = ""
+  let BaseURL = "http://ios.nat300.top"
   
   var body: some View {
     VStack {
@@ -226,7 +227,7 @@ struct ContentView: View {
           .onAppear() {
             print("loading")
             message = "获取中..."
-            shttp.get("https://u67631x482.vicp.fun/gw/novel/v1/public/app-version/novel/latest")
+            shttp.get(BaseURL + "/gw/novel/v1/public/app-version/novel/latest")
               .send { result in
                 switch result {
                 case .success(let data):
@@ -244,7 +245,7 @@ struct ContentView: View {
                     let path = data["data"]["path"].string
                     print("path: \(path!)")
                     // 开始加载解压
-                    let fileurl = URL(string: "https://u67631x482.vicp.fun" + path!)
+                    let fileurl = URL(string: BaseURL + path!)
                     FileHelper().downloadFileUnzip(from: fileurl!) { filedir in
                       if filedir == nil {
                         error = "更新失败"
