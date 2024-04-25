@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC0E81042BD9F02C00D84722 /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81032BD9F02B00D84722 /* Server.swift */; };
+		CC0E81062BD9F0F300D84722 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81052BD9F0F300D84722 /* Store.swift */; };
 		CC2817522BCF8D530062B620 /* content_serverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2817512BCF8D530062B620 /* content_serverApp.swift */; };
 		CC2817542BCF8D530062B620 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2817532BCF8D530062B620 /* ContentView.swift */; };
 		CC2817562BCF8D5A0062B620 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CC2817552BCF8D5A0062B620 /* Assets.xcassets */; };
@@ -30,6 +32,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CC0E81032BD9F02B00D84722 /* Server.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
+		CC0E81052BD9F0F300D84722 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		CC28174E2BCF8D530062B620 /* content-server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "content-server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC2817512BCF8D530062B620 /* content_serverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = content_serverApp.swift; sourceTree = "<group>"; };
 		CC2817532BCF8D530062B620 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -128,6 +132,8 @@
 				CC2818752BD0E3AC0062B620 /* findPort.swift */,
 				CC2818C12BD25CAB0062B620 /* shttp.swift */,
 				CC2818C62BD262550062B620 /* fileHelper.swift */,
+				CC0E81032BD9F02B00D84722 /* Server.swift */,
+				CC0E81052BD9F0F300D84722 /* Store.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -222,10 +228,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC0E81062BD9F0F300D84722 /* Store.swift in Sources */,
 				CC2817542BCF8D530062B620 /* ContentView.swift in Sources */,
 				CC2818C22BD25CAB0062B620 /* shttp.swift in Sources */,
 				CC2818762BD0E3AC0062B620 /* findPort.swift in Sources */,
 				CC2817522BCF8D530062B620 /* content_serverApp.swift in Sources */,
+				CC0E81042BD9F02C00D84722 /* Server.swift in Sources */,
 				CC2818C72BD262550062B620 /* fileHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -359,6 +367,7 @@
 				DEVELOPMENT_TEAM = F39445FUM3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "content-server/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -391,6 +400,7 @@
 				DEVELOPMENT_TEAM = F39445FUM3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "content-server/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

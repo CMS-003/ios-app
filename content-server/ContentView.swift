@@ -13,28 +13,6 @@ import Foundation
 import WebKit
 import UIKit
 
-// 简单保存数据
-class UserSettings: ObservableObject {
-    @Published var app_version: String {
-        didSet {
-            UserDefaults.standard.set(app_version, forKey: "app_version")
-        }
-    }
-
-    init() {
-        self.app_version = UserDefaults.standard.string(forKey: "app_version") ?? ""
-    }
-}
-
-// 创建一个类来符合 WKScriptMessageHandler 协议
-class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
-  var onMessage: ((WKScriptMessage) -> Void)?
-  
-  func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-    onMessage?(message)
-  }
-}
-
 struct WebViewContainer: UIViewRepresentable {
   @Binding var url: String
   let configuration: WKWebViewConfiguration
@@ -75,121 +53,8 @@ struct WebViewContainer: UIViewRepresentable {
   }
 }
 
-class FileServer {
-  let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-  let fileManager = FileManager.default
-  var port: Int = 8080
-  var message:String = ""
-  
-  func start(dir: URL, completion: @escaping(() -> Void)) {
-    let bootstrap = ServerBootstrap(group: group)
-      .serverChannelOption(ChannelOptions.backlog, value: 256)
-      .childChannelInitializer { channel in
-        channel.pipeline.configureHTTPServerPipeline().flatMap {
-          channel.pipeline.addHandler(HTTPHandler(dir: dir, fileManager: self.fileManager))
-        }
-      }
-    
-    do {
-      if let availablePort = findAvailablePort(startingAt: 8080) {
-        port = availablePort
-        let serverChannel = try bootstrap.bind(host: "127.0.0.1", port: port).wait()
-        print("Server running on:", serverChannel.localAddress!, " static: \(dir)")
-        // 信号处理
-        
-        serverChannel.closeFuture.whenComplete { result in
-          switch result {
-          case .success:
-            // 服务器通道关闭成功后的处理逻辑
-            print("close success")
-          case .failure(let error):
-            // 服务器通道关闭失败时的处理逻辑
-            print("close fail \(error)")
-          }
-        }
-      } else {
-        message = "无可用端口"
-      }
-      completion()
-    } catch {
-      message = "错误: \(error)"
-      print("Server error: \(error)")
-    }
-  }
-}
-
-class HTTPHandler: ChannelInboundHandler {
-  typealias InboundIn = HTTPServerRequestPart
-  typealias OutboundOut = HTTPServerResponsePart
-  
-  let fileManager: FileManager
-  let StaticDir: URL
-  
-  init(dir: URL, fileManager: FileManager) {
-    StaticDir = dir
-    self.fileManager = fileManager
-  }
-  
-  func removePrefix(from uri: String, prefixToRemove: String) -> String {
-    if uri.hasPrefix(prefixToRemove) {
-      return String(uri.dropFirst(prefixToRemove.count))
-    } else {
-      return uri
-    }
-  }
-  func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-    let reqPart = self.unwrapInboundIn(data)
-    
-    switch reqPart {
-    case .head(let head):
-      var fileURL = StaticDir.appendingPathComponent(head.uri)
-      // StaticDir.appendingPathComponent(removePrefix(from: head.uri, prefixToRemove: "/novel/"))
-      // print("url:\(head.uri)")
-      
-      // 路由匹配失败返回主页
-      if !fileManager.fileExists(atPath: fileURL.path) {
-        fileURL = StaticDir.appendingPathComponent("/index.html")
-      }
-      var mime = "text/html"
-      if head.uri.hasSuffix(".js") {
-        mime = "application/javascript"
-      } else if head.uri.hasSuffix(".css") {
-        mime = "text/css"
-      } else if head.uri.hasSuffix(".svg") {
-        mime = "image/svg+xml"
-      }
-      if fileManager.fileExists(atPath: fileURL.path) {
-        do {
-          let fileData = try Data(contentsOf: fileURL)
-          // 设置HTTP响应的头部信息
-          var headers = HTTPHeaders()
-          headers.add(name: "Content-Type", value: mime)
-          let response = HTTPResponseHead(version: head.version, status: .ok, headers: headers)
-          context.write(self.wrapOutboundOut(.head(response)), promise: nil)
-          var buffer = context.channel.allocator.buffer(capacity: fileData.count)
-          buffer.writeBytes(fileData)
-          context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
-          context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
-        } catch {
-          print("error: \(fileURL.path) \(error)")
-          let response = HTTPResponseHead(version: head.version, status: .notFound)
-          context.write(self.wrapOutboundOut(.head(response)), promise: nil)
-          context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
-        }
-      } else {
-        let response = HTTPResponseHead(version: head.version, status: .notFound)
-        context.write(self.wrapOutboundOut(.head(response)), promise: nil)
-        context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
-      }
-      
-    default:
-      break
-    }
-  }
-}
-
 struct ContentView: View {
-  @ObservedObject var userSettings = UserSettings()
+  @ObservedObject var store = Store()
   // 入口 url
   @State private var realURL: String = ""
   // 静态文件服务器
@@ -225,7 +90,7 @@ struct ContentView: View {
         Text(message)
         ProgressView()
           .onAppear() {
-            print("loading")
+            print("进入程序")
             message = "获取中..."
             shttp.get(BaseURL + "/gw/novel/v1/public/app-version/novel/latest")
               .send { result in
@@ -239,7 +104,7 @@ struct ContentView: View {
                   }
                   // 版本判断
                   let app_version = (data["data"]["version"].string)!
-                  if app_version != userSettings.app_version {
+                  if app_version != store.app_version {
                     message = "下载中.."
                     // 获取路径
                     let path = data["data"]["path"].string
@@ -251,8 +116,8 @@ struct ContentView: View {
                         error = "更新失败"
                         return
                       }
-                      print("更新应用: \(userSettings.app_version) -> \(app_version)")
-                      userSettings.app_version = app_version
+                      print("更新应用: \(store.app_version) -> \(app_version)")
+                      store.app_version = app_version
                       // 启动本地服务器
                       Server.start(dir: filedir!) {
                         realURL = "http://127.0.0.1:\(Server.port)/novel/index.html"
@@ -261,7 +126,7 @@ struct ContentView: View {
                     }
                   } else {
                     // 启动本地服务器
-                    print("无需更新应用")
+                    print("无需更新应用(\(app_version))")
                     Server.start(dir: FileHelper().getDocumentDirectory()!) {
                       realURL = "http://127.0.0.1:\(Server.port)/novel/index.html"
                       booted = true
