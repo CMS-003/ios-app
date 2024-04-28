@@ -7,15 +7,18 @@
 
 import Foundation
 import AVFoundation
+import MediaPlayer
 
 // 音量监听
 class Volumer: ObservableObject {
-  @Published var volume: Float = 0.5 // 初始音量
+  @Published var volume: Float = 0 // 初始音量
   
   private var audioSession = AVAudioSession.sharedInstance()
   private var volumeObservation: NSKeyValueObservation?
+  private var volumeView = MPVolumeView()
   
   init() {
+    self.volume = audioSession.outputVolume
     // 监听音量变化
     volumeObservation = audioSession.observe(\.outputVolume) { [weak self] (audioSession, _) in
       self?.volume = audioSession.outputVolume

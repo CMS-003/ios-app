@@ -19,13 +19,12 @@ struct WebViewContainer: UIViewRepresentable {
   @Binding var url: String
   @Binding var showVolume: Bool
   @Binding var volume: Float
+  @Binding var realVolume: Float
   let configuration: WKWebViewConfiguration
   var onLockOrientationMessage: ((WKScriptMessage) -> Void)?
   
   func makeUIView(context: Context) -> WKWebView {
-    // 处理事件
-    configuration.userContentController.add(context.coordinator, name: "volumeChanged")
-    
+
     let webview = WKWebView(frame: .zero,configuration: configuration)
     webview.allowsBackForwardNavigationGestures = false
     webview.configuration.allowsPictureInPictureMediaPlayback = true
@@ -39,11 +38,20 @@ struct WebViewContainer: UIViewRepresentable {
       webview.load(request);
       webview.allowsBackForwardNavigationGestures = true
     }
-    
+    // 处理事件
+    configuration.userContentController.add(context.coordinator, name: "volumeChanged")
+    webview.configuration.userContentController.add(context.coordinator, name: "evaluate")
     return webview;
   }
   func updateUIView (_ uiView: WKWebView, context: Context){
-    
+    // 在变量变化时执行相应的操作
+    uiView.evaluateJavaScript("setVolume(\(realVolume))") { result, error in
+      if let result = result as? String {
+        print(result)
+      } else if let error = error {
+        print("JavaScript evaluation error:", error.localizedDescription)
+      }
+    }
   }
   func makeCoordinator() -> Coordinator {
     return Coordinator(parent: self)
@@ -71,12 +79,7 @@ struct WebViewContainer: UIViewRepresentable {
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
       self.parent.url = webView.url?.absoluteString ?? ""
-      let jsScript = "window.getAppVariable = function() { return \(self.parent.volume); };"
-      webView.evaluateJavaScript(jsScript, completionHandler: { (result, error) in
-        if let error = error {
-          print("Error injecting JavaScript: \(error)")
-        }
-      })
+      // 注入 JavaScript 代码以监听 SwiftUI 变量的变化
     }
   }
 }
@@ -84,6 +87,7 @@ struct WebViewContainer: UIViewRepresentable {
 struct VolumeControlView: UIViewRepresentable {
   @Binding var volume: Float
   @Binding var show: Bool
+  
   func makeUIView(context: Context) -> MPVolumeView {
     let volumeView = MPVolumeView()
     volumeView.showsRouteButton = false // 隐藏AirPlay按钮
@@ -119,7 +123,7 @@ struct VolumeControlView: UIViewRepresentable {
 
 struct ContentView: View {
   @ObservedObject var store = Store()
-  @ObservedObject var volumeObserver = Volumer()
+  @StateObject var volumeObserver = Volumer()
   // 入口 url
   @State private var realURL: String = ""
   // 静态文件服务器
@@ -132,7 +136,7 @@ struct ContentView: View {
   @State var message = ""
   // 显示系统音量
   @State var showVolume = false
-  @State var volume:Float = AVAudioSession.sharedInstance().outputVolume
+  @State private var volume:Float = AVAudioSession.sharedInstance().outputVolume
   
   let BaseURL = "http://ios.nat300.top"
   
@@ -144,13 +148,14 @@ struct ContentView: View {
             url: $realURL,
             showVolume: $showVolume,
             volume: $volume,
-            configuration: createConfiguration(volume: volume),
+            realVolume: $volumeObserver.volume,
+            configuration: createConfiguration(volume: $volumeObserver.volume),
             onLockOrientationMessage: {message in
               print("lock")
             }
           )
           .edgesIgnoringSafeArea(.all)
-          // Text("volume: \(volumeObserver.volume)")
+          Text("volume: \(volumeObserver.volume)")
         } else if (error != "") {
           Text(error)
           Button("重试") {
@@ -238,7 +243,7 @@ struct ContentView: View {
 }
 
 // 创建 webview 配置
-func createConfiguration(volume: Float) -> WKWebViewConfiguration {
+func createConfiguration(volume: Binding<Float>) -> WKWebViewConfiguration {
   let configuration = WKWebViewConfiguration()
   configuration.allowsInlineMediaPlayback = true;
   // 添加自定义偏好设置
@@ -252,7 +257,12 @@ func createConfiguration(volume: Float) -> WKWebViewConfiguration {
     // Fallback on earlier versions
   };
   // 注入脚本
-  configuration.userContentController.addUserScript(WKUserScript(source: "function setVolume(v) { window.webkit.messageHandlers.volumeChanged.postMessage({ volume: v }); }", injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+  configuration.userContentController.addUserScript(WKUserScript(source: """
+    console.log("inject swift")
+    window.volume = \(volume.wrappedValue);
+    function setVolume(v) { window.volume = v; window.webkit.messageHandlers.volumeChanged.postMessage({ volume: v }); }
+    function getVolume() { return window.volume; }
+  """, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
   
   let pagePerference = WKWebpagePreferences()
   pagePerference.allowsContentJavaScript = true;
