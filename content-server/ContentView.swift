@@ -102,15 +102,12 @@ struct VolumeControlView: UIViewRepresentable {
         slider.minimumTrackTintColor = UIColor(hex: "#2299ddff") // 设置进度条颜色
       }
     }
-    setVolume(volumeView)
-    volumeView.setNeedsLayout()
     return volumeView
   }
   
   func updateUIView(_ uiView: MPVolumeView, context: Context) {
     // 更新视图
     setVolume(uiView)
-    uiView.setNeedsLayout()
   }
   func setVolume(_ uiView: MPVolumeView) {
     let volumeSlider = uiView.subviews.first(where: { $0 is UISlider }) as? UISlider
@@ -137,7 +134,6 @@ struct ContentView: View {
   // 显示系统音量
   @State var showVolume = false
   @State private var volume:Float = AVAudioSession.sharedInstance().outputVolume
-  
   let BaseURL = "http://ios.nat300.top"
   
   var body: some View {
@@ -155,7 +151,6 @@ struct ContentView: View {
             }
           )
           .edgesIgnoringSafeArea(.all)
-          Text("volume: \(volumeObserver.volume)")
         } else if (error != "") {
           Text(error)
           Button("重试") {
@@ -218,6 +213,9 @@ struct ContentView: View {
             }
         }
       }
+      .onAppear {
+        
+      }
       
       if showVolume {
         // MPVolumeView(frame: CGRect(x: -200, y: -200, width: 200, height: 50))
@@ -240,6 +238,7 @@ struct ContentView: View {
     }
     
   }
+
 }
 
 // 创建 webview 配置
@@ -260,7 +259,12 @@ func createConfiguration(volume: Binding<Float>) -> WKWebViewConfiguration {
   configuration.userContentController.addUserScript(WKUserScript(source: """
     console.log("inject swift")
     window.volume = \(volume.wrappedValue);
-    function setVolume(v) { window.volume = v; window.webkit.messageHandlers.volumeChanged.postMessage({ volume: v }); }
+    function setVolume(v) {
+      if (v !== window.volume) {
+        window.webkit.messageHandlers.volumeChanged.postMessage({ volume: v });
+      }
+      window.volume = v;
+    }
     function getVolume() { return window.volume; }
   """, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
   
