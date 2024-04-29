@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CC0E81042BD9F02C00D84722 /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81032BD9F02B00D84722 /* Server.swift */; };
-		CC0E81062BD9F0F300D84722 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81052BD9F0F300D84722 /* Store.swift */; };
+		CC0E81062BD9F0F300D84722 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81052BD9F0F300D84722 /* Global.swift */; };
 		CC0E81082BDA0A7800D84722 /* Volumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81072BDA0A7800D84722 /* Volumer.swift */; };
 		CC0E810A2BDA2AD600D84722 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0E81092BDA2AD600D84722 /* UIColor.swift */; };
 		CC2817522BCF8D530062B620 /* content_serverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2817512BCF8D530062B620 /* content_serverApp.swift */; };
@@ -35,7 +35,7 @@
 
 /* Begin PBXFileReference section */
 		CC0E81032BD9F02B00D84722 /* Server.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
-		CC0E81052BD9F0F300D84722 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		CC0E81052BD9F0F300D84722 /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		CC0E81072BDA0A7800D84722 /* Volumer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Volumer.swift; sourceTree = "<group>"; };
 		CC0E81092BDA2AD600D84722 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		CC28174E2BCF8D530062B620 /* content-server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "content-server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -137,7 +137,7 @@
 				CC2818C12BD25CAB0062B620 /* shttp.swift */,
 				CC2818C62BD262550062B620 /* fileHelper.swift */,
 				CC0E81032BD9F02B00D84722 /* Server.swift */,
-				CC0E81052BD9F0F300D84722 /* Store.swift */,
+				CC0E81052BD9F0F300D84722 /* Global.swift */,
 				CC0E81072BDA0A7800D84722 /* Volumer.swift */,
 				CC0E81092BDA2AD600D84722 /* UIColor.swift */,
 			);
@@ -234,7 +234,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CC0E81062BD9F0F300D84722 /* Store.swift in Sources */,
+				CC0E81062BD9F0F300D84722 /* Global.swift in Sources */,
 				CC2817542BCF8D530062B620 /* ContentView.swift in Sources */,
 				CC0E81082BDA0A7800D84722 /* Volumer.swift in Sources */,
 				CC2818C22BD25CAB0062B620 /* shttp.swift in Sources */,
