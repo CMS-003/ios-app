@@ -7,6 +7,8 @@
 
 import Foundation
 import AVFoundation
+import MediaPlayer
+import Combine
 
 // 简单保存数据
 class Global: ObservableObject {
@@ -22,10 +24,11 @@ class Global: ObservableObject {
       UserDefaults.standard.set(app_version, forKey: "app_version")
     }
   }
-  @Published var showVolumeTip = false
-  // @Published var systemVolume = AVAudioSession.sharedInstance().outputVolume
+  @Published var showVolumeTip = false  
+  
   init() {
     self.documentDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     self.app_version = UserDefaults.standard.string(forKey: "app_version") ?? ""
   }
+
 }

@@ -11,6 +11,7 @@ import MediaPlayer
 
 // 音量监听
 class Volumer: ObservableObject {
+  @Published var showTip = false
   @Published var volume: Float = 0 // 初始音量
   
   private var audioSession = AVAudioSession.sharedInstance()
@@ -19,6 +20,7 @@ class Volumer: ObservableObject {
   
   init() {
     self.volume = audioSession.outputVolume
+    print(self.volume)
     // 监听音量变化
     volumeObservation = audioSession.observe(\.outputVolume) { [weak self] (audioSession, _) in
       self?.volume = audioSession.outputVolume
