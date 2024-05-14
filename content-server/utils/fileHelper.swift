@@ -48,7 +48,7 @@ class FileHelper {
           }
         })
       } catch {
-        print("unzip fail")
+        print("unzip fail \(error)")
         completion(nil)
       }
     }.resume()
