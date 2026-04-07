@@ -70,11 +70,18 @@ class HTTPHandler: ChannelInboundHandler {
     
     switch reqPart {
     case .head(let head):
-      var fileURL = StaticDir.appendingPathComponent(head.uri)
-
+      var fileURL: URL
+      if head.uri.hasSuffix("/") {
+          // 如果是目录，创建新的 URL 追加 index.html
+          let directoryURL = StaticDir.appendingPathComponent(head.uri)
+          fileURL = directoryURL.appendingPathComponent("index.html")
+      } else {
+          fileURL = StaticDir.appendingPathComponent(head.uri)
+      }
+      
       // 路由匹配失败返回主页
       if !fileManager.fileExists(atPath: fileURL.path) {
-        fileURL = StaticDir.appendingPathComponent("/novel/index.html")
+        fileURL = StaticDir.appendingPathComponent("/hentai/")
       }
       var mime = "text/html"
       if head.uri.hasSuffix(".js") {

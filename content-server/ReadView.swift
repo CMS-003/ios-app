@@ -64,7 +64,7 @@ struct ReadView: View {
   
   var body: some View {
     WebViewContainer2(
-      homepage: "https://u67631x482.vicp.fun/read/#/",
+      homepage: "https://jiayou.work/read/#/",
       configuration: createConfiguration()
     )
     .edgesIgnoringSafeArea(.all)

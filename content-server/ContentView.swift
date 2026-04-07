@@ -25,6 +25,9 @@ struct WebViewContainer: UIViewRepresentable {
   func makeUIView(context: Context) -> WKWebView {
     
     let webview = WKWebView(frame: .zero,configuration: configuration)
+    if #available(iOS 16.4, *) {
+      webview.isInspectable = true;
+    }
     webview.allowsBackForwardNavigationGestures = false
     webview.configuration.allowsPictureInPictureMediaPlayback = true
     // webview.configuration.preferences.javaScriptEnabled = true
@@ -112,7 +115,7 @@ struct ContentView: View {
   // 启动信息
   @State var message = ""
   
-  let BaseURL = "https://u67631x482.vicp.fun"
+  let BaseURL = "https://jiayou.work"
   
   var body: some View {
     ZStack {
@@ -165,7 +168,7 @@ struct ContentView: View {
   }
   // 启动
   func bootstrap() {
-    shttp.get(BaseURL + "/gw/novel/v1/public/app-version/novel/latest")
+    shttp.get(BaseURL + "/gw/api/v1/public/remote/app/hentai/version/latest")
       .send { result in
         switch result {
         case .success(let data):
@@ -175,13 +178,13 @@ struct ContentView: View {
             error = "数据错误"
             return
           }
+          // 获取路径
+          let path = data["data"]["path"].string
+          print("path: \(path!)")
           // 版本判断
           let app_version = (data["data"]["version"].string)!
           if app_version != global.app_version {
             message = "下载中.."
-            // 获取路径
-            let path = data["data"]["path"].string
-            print("path: \(path!)")
             // 开始加载解压
             let fileurl = URL(string: BaseURL + path!)
             FileHelper().downloadFileUnzip(from: fileurl!) { filedir in
@@ -190,10 +193,10 @@ struct ContentView: View {
                 return
               }
               print("更新应用: \(global.app_version) -> \(app_version)")
-              global.app_version = app_version
+              global.app_version = app_version           
               // 启动本地服务器
               Server.start(dir: filedir!) {
-                global.url = "http://127.0.0.1:\(Server.port)/novel/index.html"
+                global.url = "http://127.0.0.1:\(Server.port)/hentai/"
                 global.serverBooted = true
               }
             }
@@ -203,7 +206,7 @@ struct ContentView: View {
             DispatchQueue.global().async {
               Server.start(dir: global.documentDir) {
                 DispatchQueue.main.async {
-                  global.url = "http://127.0.0.1:\(Server.port)/novel/index.html"
+                  global.url = "http://127.0.0.1:\(Server.port)/hentai/"
                   global.serverBooted = true
                 }
               }

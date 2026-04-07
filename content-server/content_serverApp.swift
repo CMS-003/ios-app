@@ -22,7 +22,7 @@ struct content_serverApp: App {
   var body: some Scene {
     WindowGroup {
       ZStack {
-        if currView=="novel"{
+        if currView=="hentai"{
           ContentView()
         }else if currView == "read" {
           ReadView()
@@ -30,9 +30,9 @@ struct content_serverApp: App {
           VStack {
             Spacer()
             Button(action: {
-              currView = "novel"
+              currView = "hentai"
             }) {
-              Text("novel")
+              Text("hentai")
             }
             Spacer()
               .frame(height: 50)
@@ -57,7 +57,7 @@ struct content_serverApp: App {
               }
           }
           .offset(x: -10, y: -10) // 20 像素距离顶部和右边
-          // .background(Color.gray.opacity(0.1)) // 可选，设置背景色
+          .background(Color.gray.opacity(0.1)) // 可选，设置背景色
         }
       }
     }

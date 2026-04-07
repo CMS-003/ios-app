@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+<dict>
+	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>UIBackgroundModes</key>
-		<array>
-			<string>audio</string>
-			<string>airplay</string>
-		</array>
-		<key>NSAppTransportSecurity</key>
+		<key>NSExceptionDomains</key>
 		<dict>
-			<key>NSExceptionDomains</key>
+			<key>https://jiayou.work</key>
 			<dict>
-				<key>ios.nat300.top</key>
-				<dict>
-					<key>NSIncludesSubdomains</key>
-					<true />
-					<key>NSExceptionAllowsInsecureHTTPLoads</key>
-					<true />
-					<key>NSAllowsArbitraryLoads</key>
-					<true />
-				</dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
 			</dict>
 		</dict>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>airplay</string>
+	</array>
+</dict>
 </plist>
