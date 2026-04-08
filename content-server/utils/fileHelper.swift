@@ -13,20 +13,6 @@ class FileHelper {
     let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
     return paths.first
   }
-  func printDocumentSubDir(_ sub: String) -> Void {
-      let fileManager = FileManager.default
-      var documentsUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-      documentsUrl = documentsUrl?.appendingPathComponent(sub)
-      if let documentsUrl = documentsUrl {
-        do {
-          let directoryContents = try fileManager.contentsOfDirectory(at: documentsUrl, includingPropertiesForKeys: nil, options: [])
-          let fileNames = directoryContents.map { $0.lastPathComponent }
-          print("files: \(fileNames)")
-        } catch {
-          print("Error while enumerating files \(documentsUrl.path): \(error.localizedDescription)")
-        }
-      }
-  }
   func downloadFileUnzip(from url: URL, completion: @escaping (URL?) -> Void) {
     URLSession.shared.downloadTask(with: url) { (tempURL, response, error) in
       guard let tempURL = tempURL, error == nil else {
