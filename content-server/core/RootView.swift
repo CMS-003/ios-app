@@ -26,14 +26,16 @@ struct RootView: View {
   
   @StateObject private var webCache = WebViewCache()
   @State private var selectedPage: String = ""
-  @State private var currentWebView: WKWebView? = nil
+  @State private var currentStore: WebViewInstance? = nil
   
   var body: some View {
     ZStack(alignment: .leading) {
       if (err_msg != "") {
-        Text(err_msg)
-        Button("重试") {
-          err_msg = ""
+        VStack {
+          Text(err_msg)
+          Button("重试") {
+            err_msg = ""
+          }
         }
       } else if(global.appBooted == false) {
         HStack {
@@ -57,10 +59,12 @@ struct RootView: View {
           selected: selectedApp,
           onSelect: { item in
             selectedPage = item.name
+            
+            let url_fullpath = item.path.starts(with: "http") ? item.path:global.localHost + item.path
             /// 👉 关键：这里触发 WebView 获取（缓存 or 创建）
-            webCache.getWebView(for: selectedPage, path: item.path) { webView in
+            webCache.getWebView(for: item.name, url: URL(string:url_fullpath)!) { webStore in
               DispatchQueue.main.async {
-                currentWebView = webView
+                currentStore = webStore
               }
             }
             closeMenu()
@@ -71,8 +75,9 @@ struct RootView: View {
         // 主视图 + 遮罩
         ZStack {
           /// 当前显示的 WebView（只显示一个）
-          if let webView = currentWebView {
-            WebViewContainer(webView: webView)
+          if let store = currentStore {
+            WebViewDisplay(store: store)
+              .id(webCache.forceUpdateTrigger)
           }
           /// 正在加载（第一次进入某页面）
           else if selectedPage != "" {
@@ -88,7 +93,7 @@ struct RootView: View {
                 .font(.largeTitle)
               
               Button("应用列表") {
-                offset=1
+                offset = 1
                 toggleMenu()
               }
               .padding()
@@ -100,7 +105,6 @@ struct RootView: View {
           // 遮罩（带模糊）
           if offset > 0 {
             Rectangle()
-//              .fill(.ultraThinMaterial)
               .opacity(0.8)
               .ignoresSafeArea()
               .onTapGesture {

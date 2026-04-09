@@ -10,12 +10,12 @@ import WebKit
 
 /// UIKit 的 WKWebView 包装
 /// 👉 不在这里做任何 reload 或逻辑
-struct WebViewContainer: UIViewRepresentable {
+struct WebViewDisplay: UIViewRepresentable {
   
-  let webView: WKWebView
+  let store: WebViewInstance
   
   func makeUIView(context: Context) -> WKWebView {
-    return webView
+    return store.webView
   }
   
   func updateUIView(_ uiView: WKWebView, context: Context) {}
