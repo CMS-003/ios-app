@@ -95,7 +95,6 @@ struct content_serverApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   var body: some Scene {
     WindowGroup {
-      RootView()
     }
   }
 }

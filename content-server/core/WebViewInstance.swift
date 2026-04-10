@@ -51,6 +51,13 @@ final class WebViewInstance: NSObject, ObservableObject {
     
     // 2. 先把实例占位（此时不能传 self）
     self.webView = WKWebView(frame: .zero, configuration: config)
+    // --- 解决白色背景 ---
+    webView.isOpaque = false // 1. 设置为不透明度为 false
+    webView.backgroundColor = .clear // 2. 背景设为透明
+    webView.scrollView.backgroundColor = .clear // 3. 滚动视图也要设为透明
+    
+    // --- 强制适配内容 ---
+    webView.scrollView.contentInsetAdjustmentBehavior = .never // ⚠️ 关键：禁用系统自动调整，交给网页 env() 处理
     
     super.init() // 这一步执行完后，self 才真正可用
     

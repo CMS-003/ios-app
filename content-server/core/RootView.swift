@@ -77,9 +77,9 @@ struct RootView: View {
           /// 当前显示的 WebView（只显示一个）
           if let store = currentStore {
             ZStack {
-            WebViewDisplay(store: store)
-                .ignoresSafeArea()
-              .id(webCache.forceUpdateTrigger)
+              WebViewDisplay(store: store)
+                .ignoresSafeArea(.all)
+                .id(webCache.forceUpdateTrigger)
               if store.isLoading {
                 Rectangle()
                   .opacity(0.9)
