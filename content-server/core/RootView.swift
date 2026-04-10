@@ -16,6 +16,14 @@ struct RootView: View {
   @State var message = ""
   @State var err_msg = ""
   
+  @StateObject private var webCache = WebViewCache()
+  @State private var selectedPage: String = ""
+  @State private var currentStore: WebViewInstance? = nil
+  
+  // 屏幕旋转管理
+  @StateObject private var orientationManager = OrientationManager.shared
+  @State private var lastNotifiedOrientation: String = ""  // 缓存上次通知的方向
+  
   // 侧滑菜单
   @State private var offset: CGFloat = 0
   @State private var isOpen: Bool = false
@@ -23,10 +31,6 @@ struct RootView: View {
   @State private var menuItems: [MenuItem] = []
   @State private var selectedApp: String = ""
   private let menuWidth: CGFloat = 120
-  
-  @StateObject private var webCache = WebViewCache()
-  @State private var selectedPage: String = ""
-  @State private var currentStore: WebViewInstance? = nil
   
   var body: some View {
     ZStack(alignment: .leading) {
@@ -62,11 +66,7 @@ struct RootView: View {
             
             let url_fullpath = item.path.starts(with: "http") ? item.path:global.localHost + item.path
             /// 👉 关键：这里触发 WebView 获取（缓存 or 创建）
-            webCache.getWebView(for: item.name, url: URL(string:url_fullpath)!) { webStore in
-              DispatchQueue.main.async {
-                currentStore = webStore
-              }
-            }
+            currentStore = webCache.getWebView(for: item.name, url: URL(string:url_fullpath)!);
             closeMenu()
           }
         )
@@ -76,8 +76,19 @@ struct RootView: View {
         ZStack {
           /// 当前显示的 WebView（只显示一个）
           if let store = currentStore {
+            ZStack {
             WebViewDisplay(store: store)
+                .ignoresSafeArea()
               .id(webCache.forceUpdateTrigger)
+              if store.isLoading {
+                Rectangle()
+                  .opacity(0.9)
+                  .ignoresSafeArea()
+                ProgressView("载入中...")
+                  .foregroundStyle(.blue)
+              }
+            }
+            
           }
           /// 正在加载（第一次进入某页面）
           else if selectedPage != "" {
@@ -118,6 +129,37 @@ struct RootView: View {
         .gesture(dragGesture())
         .animation(.easeInOut(duration: 0.25), value: offset)
       }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+      // 延迟一点获取最终方向，避免中间状态
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        handleOrientationChange()
+      }
+    }
+    .onAppear {
+      UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+      orientationManager.appOrientation = orientationManager.getDeviceOrientation()
+      lastNotifiedOrientation = orientationManager.appOrientation
+    }
+  }
+  
+  private func handleOrientationChange() {
+    let currentOrientation = orientationManager.getDeviceOrientation()
+    
+    // ✅ 只有真正改变时才通知
+    if currentOrientation != lastNotifiedOrientation {
+      // print("方向真正改变: \(lastNotifiedOrientation) -> \(currentOrientation)")
+      lastNotifiedOrientation = currentOrientation
+      notifyWebView(orientation: currentOrientation)
+    } else {
+      // print("方向未改变，忽略通知")
+    }
+  }
+  
+  private func notifyWebView(orientation: String) {
+    if let store = currentStore {
+      let jsCode = "NativeBridge.receive('deviceOrientation', '\(orientation)')"
+      store.webView.evaluateJavaScript(jsCode, completionHandler: nil)
     }
   }
 }

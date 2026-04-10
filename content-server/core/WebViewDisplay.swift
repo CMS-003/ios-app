@@ -12,7 +12,7 @@ import WebKit
 /// 👉 不在这里做任何 reload 或逻辑
 struct WebViewDisplay: UIViewRepresentable {
   
-  let store: WebViewInstance
+  @ObservedObject var store: WebViewInstance
   
   func makeUIView(context: Context) -> WKWebView {
     return store.webView

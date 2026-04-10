@@ -29,6 +29,7 @@
 		CC2818E92BD2686B0062B620 /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = CC2818E82BD2686B0062B620 /* Zip */; };
 		CC2818EB2BD27DF20062B620 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = CC2818EA2BD27DF20062B620 /* README.md */; };
 		CC8AEFCB2F85F70E00999AE7 /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8AEFC92F85F70D00999AE7 /* Server.swift */; };
+		CC8AEFD22F87A78500999AE7 /* OrientationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8AEFD12F87A78400999AE7 /* OrientationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		CC2818CC2BD2634D0062B620 /* logo.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = logo.jpg; sourceTree = "<group>"; };
 		CC2818EA2BD27DF20062B620 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		CC8AEFC92F85F70D00999AE7 /* Server.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
+		CC8AEFD12F87A78400999AE7 /* OrientationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -96,6 +98,7 @@
 		CC2817502BCF8D530062B620 /* content-server */ = {
 			isa = PBXGroup;
 			children = (
+				CC8AEFD12F87A78400999AE7 /* OrientationManager.swift */,
 				CC8AEFBC2F85F49C00999AE7 /* core */,
 				CC2818742BD0E39D0062B620 /* utils */,
 				CC28178B2BCFA6D30062B620 /* www */,
@@ -237,6 +240,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC0E81062BD9F0F300D84722 /* Global.swift in Sources */,
+				CC8AEFD22F87A78500999AE7 /* OrientationManager.swift in Sources */,
 				CC8AEFCB2F85F70E00999AE7 /* Server.swift in Sources */,
 				CC0E81082BDA0A7800D84722 /* Volumer.swift in Sources */,
 				CC2818C22BD25CAB0062B620 /* shttp.swift in Sources */,
