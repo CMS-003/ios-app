@@ -67,6 +67,8 @@ struct SideMenuView: View {
       }
     }
     .padding(.horizontal, 20)
+    .padding(.top, 47)
+    .padding(.bottom, 30)
     .background(Color(.systemBackground))
   }
 }

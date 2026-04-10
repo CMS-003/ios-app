@@ -126,6 +126,7 @@ struct RootView: View {
               }
           }
         }
+        .ignoresSafeArea(.all)
         .offset(x: offset)
         // .scaleEffect(isOpen ? 0.95 : 1) // 轻微缩放（更高级）
         .shadow(radius: isOpen ? 3 : 0)

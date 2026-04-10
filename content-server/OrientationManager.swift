@@ -40,7 +40,7 @@ class OrientationManager: ObservableObject {
       appOrientation = getDeviceOrientation()
       appDelegate?.rotateOrientation(to: appOrientation == "portrait" ? .portrait : .landscape )
     }
-    print("当前方向: \(appOrientation), 锁定状态: \(isLocked) \(String(describing: appDelegate?.orientationLock))")
+    print("当前方向: \(appOrientation), 锁定状态: \(isLocked)")
   }
   
   func getDeviceOrientation() -> String {
