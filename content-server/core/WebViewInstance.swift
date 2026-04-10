@@ -78,6 +78,30 @@ final class WebViewInstance: NSObject, ObservableObject {
     self.webView.load(URLRequest(url: url))
   }
   
+  func injectSafeAreaValues(to webView: WKWebView) {
+    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+          let window = windowScene.windows.first else { return }
+    
+    let insets = window.safeAreaInsets
+    
+    // 准备 JS 脚本：在 :root 上定义 CSS 变量
+    // 这里我们自定义变量名，避免与系统的 env() 冲突
+    let js = """
+          document.documentElement.style.setProperty('--safe-padding-top', '\(insets.top)px');
+          document.documentElement.style.setProperty('--safe-padding-bottom', '\(insets.bottom)px');
+          document.documentElement.style.setProperty('--safe-padding-left', '\(insets.left)px');
+          document.documentElement.style.setProperty('--safe-padding-right', '\(insets.right)px');
+      """
+    
+    webView.evaluateJavaScript(js) { _, error in
+      if let error = error {
+        print("❌ 注入安全区失败: \(error)")
+      } else {
+        print("✅ 注入安全区成功: Top=\(insets.top)")
+      }
+    }
+  }
+  
   deinit {
     webView.removeObserver(self, forKeyPath: "title")
     webView.removeObserver(self, forKeyPath: "canGoBack")
@@ -123,6 +147,7 @@ extension WebViewInstance: WKNavigationDelegate {
   }
   
   func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    injectSafeAreaValues(to: webView)
     DispatchQueue.main.async {
       DispatchQueue.main.asyncAfter(deadline: .now()+1) {
         self.isLoading = false
