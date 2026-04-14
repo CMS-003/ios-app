@@ -41,7 +41,7 @@ struct RootView: View {
             err_msg = ""
           }
         }
-      } else if(global.appBooted == false) {
+      } else if(global.serverBooted == false) {
         HStack {
           ProgressView()
             .onAppear() {
@@ -62,24 +62,33 @@ struct RootView: View {
           items: menuItems,
           selected: selectedApp,
           onSelect: { item in
-            selectedPage = item.name
+            selectedPage = item._id
+            closeMenu()
             
+            global.appBooting = item.path.starts(with: "/");
             let url_fullpath = item.path.starts(with: "http") ? item.path:global.localHost + item.path
             /// 👉 关键：这里触发 WebView 获取（缓存 or 创建）
-            currentStore = webCache.getWebView(for: item.name, url: URL(string:url_fullpath)!);
-            closeMenu()
+            currentStore = webCache.getWebView(for: item._id, url: URL(string:url_fullpath)!);
+            
+            if global.appBooting {
+              Task {
+                try await updateApp(app: item.name, _id: item._id)
+              }
+            }
           }
         )
         .frame(width: menuWidth)
         
         // 主视图 + 遮罩
         ZStack {
+          Color(.systemBackground)
+            .edgesIgnoringSafeArea(.all)
           /// 当前显示的 WebView（只显示一个）
-          if let store = currentStore {
+          if global.appBooting {
+            ProgressView("检查中...")
+          }
+          else if let store = currentStore {
             ZStack {
-              Color
-                .white
-                .ignoresSafeArea(.all)
               WebViewDisplay(store: store)
                 .ignoresSafeArea(.all)
                 .id(webCache.forceUpdateTrigger)
@@ -99,8 +108,6 @@ struct RootView: View {
           }
           /// 默认欢迎页
           else {
-            Color(.systemBackground)
-              .edgesIgnoringSafeArea(.all)
             VStack {
               Spacer()
               Text("欢迎🎉🎉")
@@ -128,12 +135,12 @@ struct RootView: View {
         }
         .ignoresSafeArea(.all)
         .offset(x: offset)
-        // .scaleEffect(isOpen ? 0.95 : 1) // 轻微缩放（更高级）
         .shadow(radius: isOpen ? 3 : 0)
         .gesture(dragGesture())
         .animation(.easeInOut(duration: 0.25), value: offset)
       }
     }
+    .ignoresSafeArea(.all)
     .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
       // 延迟一点获取最终方向，避免中间状态
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -224,34 +231,56 @@ extension RootView {
 extension RootView {
   
   func bootstrap() async throws -> Void {
-    // 👉 模拟主进程获取数据（你可以替换为 API / 本地数据库）
-    menuItems = [
-      MenuItem(name: "hentai", path: "/hentai/", title: "首页"),
-      MenuItem(name: "reader", path: "https://jiayou.work/read/#/", title: "阅读")
-    ]
-    
-    // 恢复上次选择
-    if let last = UserDefaults.standard.string(forKey: "last_selection"){
-      for item in menuItems {
-        if item.name == last {
-          selectedApp = item.name
-          break
-        }
-      }
-    } else {
-      selectedApp = ""
-    }
-    
+    // 启动静态服务
     global.localHost = await withCheckedContinuation{
       continuation in
       LocalServerManager.shared.startIfNeeded {url in
         continuation.resume(returning: url)
       }
     }
+    global.serverBooted = true
+    // 获取应用列表
+    let appResults = await withCheckedContinuation{
+      continuation in
+      shttp.get(BaseURL+"/gw/api/v1/public/remote/apps")
+        .send{ resp in
+          continuation.resume(returning: resp)
+        }
+    }
+    switch appResults {
+    case .success(let data):
+      let code = data["code"].int
+      if (code != 0) {
+        err_msg = "数据错误"
+        return
+      }
+      if let items = data["data"]["items"].array {
+        self.menuItems = items.map { item in
+          MenuItem(
+            _id:  item["_id"].stringValue,
+            name:  item["name"].stringValue,
+            path:  item["path"].stringValue,
+            title: item["title"].stringValue
+          )
+        }
+      } else {
+        err_msg = "格式错误"
+        return
+      }
+      
+    case .failure(let err):
+      // 处理错误
+      err_msg = "网络错误 \(err)"
+      return
+    }
+    
+  }
+  
+  func updateApp(app: String, _id: String) async throws -> Void {
     
     let result = await withCheckedContinuation {
       continuation in
-      shttp.get(BaseURL + "/gw/api/v1/public/remote/app/hentai/version/latest")
+      shttp.get(BaseURL + "/gw/api/v1/public/remote/app/\(app)/version/latest")
         .send { resp in
           continuation.resume(returning: resp)
         }
@@ -268,9 +297,10 @@ extension RootView {
       // 获取路径
       let path = data["data"]["path"].string
       
+      let currentVer = global.apps_version[_id] ?? "0.0.0"
       // 版本判断
       let app_version = (data["data"]["version"].string)!
-      if app_version != global.app_version {
+      if app_version != currentVer {
         message = "下载中.."
         // 开始加载解压
         let fileurl = URL(string: BaseURL + path!)
@@ -281,21 +311,17 @@ extension RootView {
           }
           print("更新应用: \(global.app_version) -> \(app_version)")
           DispatchQueue.main.async {
-            global.app_version = app_version
-            global.appBooted = true
+            global.apps_version[_id] = app_version
+            global.appBooting = false
           }
         }
       } else {
-        global.appBooted = true
+        global.appBooting = false
       }
     case .failure(let err):
       // 处理错误
       err_msg = "网络错误 \(err)"
       return
     }
-  }
-  
-  func saveLastSelection(_ item: String) {
-    UserDefaults.standard.set(item, forKey: "last_selection")
   }
 }

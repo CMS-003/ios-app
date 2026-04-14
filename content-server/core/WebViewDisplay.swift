@@ -18,5 +18,7 @@ struct WebViewDisplay: UIViewRepresentable {
     return store.webView
   }
   
-  func updateUIView(_ uiView: WKWebView, context: Context) {}
+  func updateUIView(_ uiView: WKWebView, context: Context) {
+    // print("WebView Safe Area: \(store.webView.safeAreaInsets)")
+  }
 }

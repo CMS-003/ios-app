@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct MenuItem {
-  let name: String  // 唯一标识
+  let _id: String   // 唯一标识
+  let name: String  // 应用标识
   var path: String  // 地址
   let title: String // 显示标题
 }
@@ -27,14 +28,14 @@ struct SideMenuView: View {
         .bold()
         .padding(.top, 20)
       
-      ForEach(items, id: \.name) { item in
+      ForEach(items, id: \._id) { item in
         Button {
-          selected = item.name
+          selected = item._id
           onSelect(item)
         } label: {
           HStack {
             Spacer()
-            if item.name == selected {
+            if item._id == selected {
               Text(item.title)
                 .padding(.bottom, 4)
                 .overlay(

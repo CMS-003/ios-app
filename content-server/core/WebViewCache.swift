@@ -52,16 +52,16 @@ class WebViewCache: ObservableObject {
   // 当ID用
   @Published var forceUpdateTrigger = UUID()
   
-  func has(_ page: String) -> Bool {
-    return cache[page] != nil
+  func has(_ app_id: String) -> Bool {
+    return cache[app_id] != nil
   }
   
   func getWebView(
-    for page: String,
+    for app_id: String,
     url: URL
   ) -> WebViewInstance {
     // ✅ 已缓存
-    if let existing = cache[page] {
+    if let existing = cache[app_id] {
       // ✅ 强制触发更新
       self.forceUpdateTrigger = UUID()
       return existing
@@ -139,7 +139,7 @@ class WebViewCache: ObservableObject {
       self?.objectWillChange.send()
     }
     
-    cache[page] = store
+    cache[app_id] = store
     self.forceUpdateTrigger = UUID()
     return store;
   }
